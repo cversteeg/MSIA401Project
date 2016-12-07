@@ -7,6 +7,8 @@
 library(car)
 library(data.table)
 library("ggplot2")
+library(plyr)
+library(dplyr)
 
 #### Cadence ####
 
@@ -115,9 +117,24 @@ table1 <- prop.table(table(donor$DONATED, donor$STATCODE),2)
 names <- c(colnames(table1))
 percentage <- c(table1[2,])
 table1 <- data.frame(names,percentage)
-ggplot(table1,aes(x= reorder(names,-percentage)percentage))+geom_bar(stat ="identity")
 
 median(table1$percentage)
 table1[table1$percentage > median(table1$percentage),1]
 
 table(donor$STATCODE)
+
+
+### Most Generous States ###
+donated <- donor[donor$DONATED == 1,]
+Generous_states <- ddply(donated,'STATCODE',summarize,mean=mean(TARGDOL))
+Generous_states <- Generous_states[with(Generous_states, order(-Generous_states$mean)),]
+barplot(Generous_states$mean, names.arg = Generous_states$STATCODE, ylab = "Mean of TARGDOL", xlab = "STATCODE", main = "Average TARGDOL by State")
+View(Generous_states)
+rm(Generous_states)
+
+### Most Generous Genders ###
+donated <- donor[donor$DONATED == 1,]
+Generous_genders <- ddply(donated,'SEX',summarize,mean=mean(TARGDOL))
+plot(Generous_genders, ylab = "Mean of TARGDOL", xlab = "SEX Code", main = "Average TARGDOL by Gender")
+View(Generous_genders)
+rm(Generous_genders)

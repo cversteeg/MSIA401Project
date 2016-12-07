@@ -84,3 +84,24 @@ donor$STATE <- as.numeric(donor$STATCODE == 'GU'|
                             donor$STATCODE == 'NJ'|
                             donor$STATCODE == 'CT'|
                             donor$STATCODE == 'NY')
+# STATE.LM
+donor$STATE.LM <- as.numeric(donor$STATCODE == 'AE'|
+                            donor$STATCODE == 'GU'|
+                            donor$STATCODE == 'AK'|
+                            donor$STATCODE == 'DC'|
+                            donor$STATCODE == 'PR'|
+                            donor$STATCODE == 'HI'|
+                            donor$STATCODE == 'OR'|
+                            donor$STATCODE == 'GA'|
+                            donor$STATCODE == 'VA'|
+                            donor$STATCODE == 'CA'|
+                            donor$STATCODE == 'MD'|
+                            donor$STATCODE == 'WA'|
+                            donor$STATCODE == 'AL'|
+                            donor$STATCODE == 'MI'|
+                            donor$STATCODE == 'MS'|
+                            donor$STATCODE == 'AZ'|
+                            donor$STATCODE == 'NV'|
+                            donor$STATCODE == 'OK'|
+                            donor$STATCODE == 'TX'|
+                            donor$STATCODE == 'SC')
