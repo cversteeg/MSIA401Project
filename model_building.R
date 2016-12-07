@@ -4,12 +4,42 @@
 ###                                     ###
 ###########################################
 
+library(pROC)
+
 ### Removing influential Obs
-donor <- subset(donor, TARGDOL <= 100)
+donor <- subset(donor, TARGDOL <= 250)
 
 ### Taking Test and Training Data set
-training <- donor[donor$ID %% 2 == 0 ,]
-test <- donor[donor$ID %% 2 != 0 , ]
+seq <- seq(3, nrow(donor), by=3)
+test <- donor[seq,]
+training <- donor[-seq,]
+rm(seq)
+
+
+############# Best Case Fit ##############
+
+fit = glm(DONATED ~ 
+            CNDOL1 +
+            SLOPE1 +
+            MONTHS6 +
+            CNTMLIF +
+            STATE +
+            GENDER +
+            CNMON1
+          ,family=binomial, data = training)
+
+summary(fit)
+
+plot.roc(training$DONATED, fit$fitted.values, xlab = "1-Specificity")
+
+# Truth Tables
+tab=table(fit$y, fit$fitted.values>.50) # Set the probability threshold to classify donors
+tab # Classification Matrix
+CCR=sum(diag(tab))/sum(tab)
+CCR # Correct Classification Rate
+
+
+############# Testing Fits ###################
 
 # Creating a fit
 fit = glm(DONATED ~ MONTHS12 + MONTHS6, family=binomial, data = donor)
@@ -32,30 +62,3 @@ predict(fit,newdata=testcasemedium,type="response")
 
 testcasehigh = data.frame(MONTHS12=0, MONTHS6=1, CNCOD1=5, CNTMLIF=6, CNTRLIF=30, CNMONF=36)
 predict(fit,newdata=testcasehigh,type="response")
-
-# Truth Tables
-tab=table(fit$y, fit$fitted.values>.50) # Set the probability threshold to classify donors
-tab # Classification Matrix
-CCR=sum(diag(tab))/sum(tab)
-CCR # Correct Classification Rate
-
-# Specificity Accuracy
-# See what contribution codes are most successful
-
-hist(donor$CNMONF)
-hist(donor$cadence1)
-
-############# Best Case Fit ##############
-
-fit = glm(DONATED ~ 
-            CNDOL1 +
-            SLOPE1 +
-            CNTRLIF + 
-            MONTH6 +
-            MONTH12 +
-            CNTMLIF +
-            SEX$B +
-            CNMON1
-          ,family=binomial, data = training)
-
-summary(fit)

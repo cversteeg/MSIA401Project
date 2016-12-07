@@ -4,12 +4,17 @@
 ###                                     ###
 ###########################################
 
+library(car)
+library(data.table)
+library("ggplot2")
+
 #### Cadence ####
 
 frequency_table <- as.data.frame(table(donor$cadence_final))#  Frequency Table
 frequency_table
-plot(x = frequency_table$Var1, y = frequency_table$Freq / sum(frequency_table$Freq), labels = TRUE)
+plot(x = frequency_table$Var1, y = (frequency_table$Freq / sum(frequency_table$Freq))*100, xlab = "Months of Cadence", ylab = "Percent of Cadences", main = "Percent of Cadences")
 # Note that if Cadence == 0, then the donor donated 3 times in the same monthN
+as.data.frame(frequency_table$Freq / sum(frequency_table$Freq)*100)
 
 # In the write-up about the cadence, we should mention that cadence takes at least 3 
 # donations to establish, because we need to look at the time difference between the donations
@@ -27,7 +32,8 @@ table1[2,2]/sum(table1[2,]) # Correctly identified those that DID donate = 30%
 
 # Calculating if the cadence was correct
 table2 <- table(donor$cadence_correct, donor$cadence_final)
-prop.table(table2,2)
+barplot(prop.table(table2,2)[2,1:24], ylab = "% Correctly Predicted", xlab = "Months of Cadence", main = "Accuracy of Cadnece")
+
 # Summary: I was only able to find cadences for 2,423 donors which is only 2%
 # of the population. However, cadence was only able to get 60% correct.
 # Also, there aren't many cadences that are better than others. 12 months and 6 months is ok
@@ -41,6 +47,8 @@ table2 <- prop.table(table1, 2)
 table2[2,]
 barplot(table2[2,], main="Percentage of Each Gender Who Actually Donated", 
         xlab = "Gender Codes", ylab = "Percentage")
+table(donor$SEX)
+477/99191
 #Married, Male, and Female are more likely to Donate
 
 ### Plots of Percentages of DONATED by CNMON1
@@ -100,3 +108,16 @@ table(donor$DONATED, donor$TREND)
 prop.table(table(donor$DONATED, donor$TREND),2)
 barplot(prop.table(table(donor$DONATED, donor$TREND),2)[2,])
 # Slope doesn't have any impact. In fact, positive trends did worse than negative trends.
+
+
+### Plots of Percentages of DONATED by STATECODE
+table1 <- prop.table(table(donor$DONATED, donor$STATCODE),2)
+names <- c(colnames(table1))
+percentage <- c(table1[2,])
+table1 <- data.frame(names,percentage)
+ggplot(table1,aes(x= reorder(names,-percentage)percentage))+geom_bar(stat ="identity")
+
+median(table1$percentage)
+table1[table1$percentage > median(table1$percentage),1]
+
+table(donor$STATCODE)

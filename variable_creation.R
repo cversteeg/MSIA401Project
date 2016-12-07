@@ -27,9 +27,12 @@ donor$cadence_correct <- as.numeric(donor$cadence_due) == donor$DONATED
 
 # Creating donors that have dontated three months from our test period. NOTE that we 
 # have 0 donations for our 3 month time frame, because we are 4 months from our test period
-donor$MONTHS3 <- as.numeric(donor$CNDAT1 == 189 | donor$CNDAT1 == 188 | donor$CNDAT1 == 187)
-donor$MONTHS6 <- as.numeric(donor$CNDAT1 == 186 | donor$CNDAT1 == 185 | donor$CNDAT1 == 184)
-donor$MONTHS12 <- as.numeric(donor$CNDAT1 == 180 | donor$CNDAT1 == 179 | donor$CNDAT1 == 178)
+donor$MONTHS3 <- as.numeric((donor$CNDAT1 == 189 | donor$CNDAT1 == 188 | donor$CNDAT1 == 187) & donor$cadence_final == 3)
+donor$MONTHS6 <- as.numeric((donor$CNDAT1 == 186 | donor$CNDAT1 == 185 | donor$CNDAT1 == 184) & donor$cadence_final == 6)
+donor$MONTHS12 <- as.numeric((donor$CNDAT1 == 180 | donor$CNDAT1 == 179 | donor$CNDAT1 == 178) & donor$cadence_final == 12)
+donor$MONTHS3[is.na(donor$MONTHS3)] <- 0
+donor$MONTHS6[is.na(donor$MONTHS6)] <- 0
+donor$MONTHS12[is.na(donor$MONTHS12)] <- 0
 
 #### Merging Codes
 donor <- merge(donor, codes, by.x="CNCOD1", by.y="CODE", all.x=TRUE) #Merge code types for CNCOD1
@@ -55,5 +58,29 @@ donor$slope2_neg <- as.numeric(donor$SLOPE2 < 0)
 donor$TREND <- ifelse(donor$slope1_pos == 1, 'Positive',
                       ifelse(donor$slope1_neut == 1 , 'Steady',
                              ifelse(donor$slope1_neg == 1 ,'Negative', NA)))
+donor$SLOPE1[is.na(donor$SLOPE1)] <- 0
+donor$SLOPE2[is.na(donor$SLOPE2)] <- 0
 ### Maybe for simplicicties sake, just look at the slope1
 
+###Variables for Logistic
+donor$GENDER <- as.numeric(donor$SEX == 'B')
+donor$STATE <- as.numeric(donor$STATCODE == 'GU'|
+                            donor$STATCODE == 'SD'|
+                            donor$STATCODE == 'ND'|
+                            donor$STATCODE == 'WI'|
+                            donor$STATCODE == 'PA'|
+                            donor$STATCODE == 'WY'|
+                            donor$STATCODE == 'OH'|
+                            donor$STATCODE == 'IA'|
+                            donor$STATCODE == 'PR'|
+                            donor$STATCODE == 'MN'|
+                            donor$STATCODE == 'IN'|
+                            donor$STATCODE == 'AK'|
+                            donor$STATCODE == 'MI'|
+                            donor$STATCODE == 'AZ'|
+                            donor$STATCODE == 'NE'|
+                            donor$STATCODE == 'MA'|
+                            donor$STATCODE == 'MO'|
+                            donor$STATCODE == 'NJ'|
+                            donor$STATCODE == 'CT'|
+                            donor$STATCODE == 'NY')
