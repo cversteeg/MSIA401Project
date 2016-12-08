@@ -105,3 +105,5 @@ donor$STATE.LM <- as.numeric(donor$STATCODE == 'AE'|
                             donor$STATCODE == 'OK'|
                             donor$STATCODE == 'TX'|
                             donor$STATCODE == 'SC')
+
+donor$CNCODEBIN <- as.numeric(donor$CNCOD1TYPE == 'A')

@@ -9,6 +9,7 @@ library(data.table)
 library("ggplot2")
 library(plyr)
 library(dplyr)
+library(pROC)
 
 #### Cadence ####
 
@@ -34,7 +35,7 @@ table1[2,2]/sum(table1[2,]) # Correctly identified those that DID donate = 30%
 
 # Calculating if the cadence was correct
 table2 <- table(donor$cadence_correct, donor$cadence_final)
-barplot(prop.table(table2,2)[2,1:24], ylab = "% Correctly Predicted", xlab = "Months of Cadence", main = "Accuracy of Cadnece")
+barplot(prop.table(table2,2)[2,1:24], ylab = "% Correctly Predicted", xlab = "Months of Cadence", main = "Accuracy of Cadence")
 
 # Summary: I was only able to find cadences for 2,423 donors which is only 2%
 # of the population. However, cadence was only able to get 60% correct.
@@ -108,7 +109,7 @@ barplot(table1[2,], main="% Who Donated by Month's Since Last Donation",
 ##### Slope ####
 table(donor$DONATED, donor$TREND)
 prop.table(table(donor$DONATED, donor$TREND),2)
-barplot(prop.table(table(donor$DONATED, donor$TREND),2)[2,])
+barplot(prop.table(table(donor$DONATED, donor$TREND),2)[2,], ylab = "Percentage", main = "Percent Who Donated by Trend")
 # Slope doesn't have any impact. In fact, positive trends did worse than negative trends.
 
 
@@ -123,6 +124,8 @@ table1[table1$percentage > median(table1$percentage),1]
 
 table(donor$STATCODE)
 
+##### CNCOD1TYPE ####
+barplot(prop.table(table(donor$DONATED, donor$CNCOD1TYPE),2)[2,], ylab = "Donation Rate", xlab = "Donation Code", main = "Donation Rate by Donation Code")
 
 ### Most Generous States ###
 donated <- donor[donor$DONATED == 1,]
@@ -138,3 +141,15 @@ Generous_genders <- ddply(donated,'SEX',summarize,mean=mean(TARGDOL))
 plot(Generous_genders, ylab = "Mean of TARGDOL", xlab = "SEX Code", main = "Average TARGDOL by Gender")
 View(Generous_genders)
 rm(Generous_genders)
+
+### ROC Curve for Logisitic ###
+plot.roc(training$DONATED, glm.fit$fitted.values, xlab = "1-Specificity") # ROC Curve
+fit$null.deviance - glm.fit$deviance
+qchisq(.95, df=7)        # 7 degrees of freedom 
+
+### Most Generous Codes ###
+donated <- donor[donor$DONATED == 1,]
+Generous_Codes <- ddply(donated,'CNCOD1TYPE',summarize,mean=mean(TARGDOL))
+plot(Generous_Codes, ylab = "Mean of TARGDOL", xlab = "Latest Code", main = "Average TARGDOL by Code")
+View(Generous_Codes)
+rm(Generous_Codes)
