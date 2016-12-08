@@ -75,12 +75,16 @@ merged$SLCOC2TYPE <- as.factor(merged$SLCOC2TYPE)
 merged$SLCOC3TYPE <- as.factor(merged$SLCOC3TYPE)
 merged$CNCOD2TYPE <- as.factor(merged$CNCOD2TYPE)
 merged$CNCOD3TYPE <- as.factor(merged$CNCOD3TYPE)
-#Adding Trend line
+#Getting rid of NAs
+merged$CNDOL2(is.na(merged$CNDOL2)) = 0
+merged$CNDOL3(is.na(merged$CNDOL3)) = 0
+
+#Adding Trend Variable
 merged$trend = sign(merged$CNDOL1 - merged$CNDOL2)
 merged$trend[is.na(merged$trend)] = 0
 
-
 #Generate training and testing
+
 mergedTraining1 = merged[seq(1, 99200, 3),]
 mergedTraining2 = merged[seq(2, 99200, 3),]
 mergedTraining = rbind(mergedTraining1, mergedTraining2)
@@ -92,9 +96,13 @@ logitTesting = mergedTesting
 logitTesting$donated = logitTesting$TARGDOL >0
 logitTesting$TARGDOL = NULL
 
+linearDatasetTraining = mergedTraining[mergedTraining$TARGDOL > 0,]
+linearDatasetTesting = mergedTesting[mergedTesting$TARGDOL >0,]
 
+testingIDs = linearDatasetTesting$ID
+trainingIDs = linearDatasetTraining$ID
 
-logit1 = glm(formula = donated~ CONLARG + CNTMLIF + REGION + SEX +CNMON1, family = "binomial", data = logitTraining)
+logit1 = glm(formula = donated~ CNDOL1 + CNTRLIF + CONLARG + CONTRFST + SEX + CNDOL1:SEX + CNDOL2 +CNDOL3 +CNMON1 + CNTMLIF, family = "binomial", data = logitTraining)
 logitTest1 = predict(logit1, newdata = logitTesting)
 logitTrain1 = predict(logit1, newdata = logitTraining)
 
@@ -106,11 +114,12 @@ logitTestPosterior1 = priorDonation*logitTestOdds1/(priorDonation*logitTestOdds1
 logitTrainOdds1 = exp(logitTrain1)/(1+exp(logitTrain1))
 logitTrainPosterior1 = priorDonation*logitTrainOdds1/(priorDonation*logitTrainOdds1 + (1-priorDonation)*(1-logitTrainOdds1))
 
-linear1 = lm(formula = TARGDOL~CONLARG +CNTMLIF +REGION + SEX + CNMON1, data = mergedTraining)
-predictedDonation1 = predict(linear1, newdata = mergedTesting)
+linear1 = lm(formula = TARGDOL~CNDOL1 + CNTRLIF + CONLARG + CONTRFST + SEX + CNDOL1:SEX +  + CNDOL2 +CNDOL3 +CNMON1 + CNTMLIF, data = linearDatasetTraining)
+predictedDonation1 = predict(linear1, newdata = linearDatasetTesting)
 
-predictedValue1 = predictedDonation1*logitTestPosterior1
+predictedValue1 = predictedDonation1*logitTestOdds1[is.element(logitTesting$ID, testingIDs) ]
 sortedPrediction = sort(predictedValue1)
-topPrediction = sortedPrediction[length(sortedPrediction):-1:1]
+topPrediction = sortedPrediction[length(sortedPrediction):1]
 topPredictions = topPrediction[1:1000]
 totalIncome = sum(topPredictions)
+
